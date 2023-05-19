@@ -1,0 +1,7 @@
+## Interface: 100007
+## Title: PicoMenu
+## Notes: PicoMenu extracted from nMainBar
+## Author: Zythyx0, nMainBar(Neal, ballagarba)
+## Version: 10.0
+
+PicoMenu.xml
