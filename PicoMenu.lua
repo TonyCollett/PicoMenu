@@ -128,7 +128,7 @@ local menuList = {
         text = ENCOUNTER_JOURNAL,
         icon = "Interface\\MINIMAP\\TRACKING\\Profession",
         func = function()
-            ToggleEncounterJournal()
+            ToggleEncounterJournal(1)
         end,
         notCheckable = true,
         fontObject = Game13Font,
