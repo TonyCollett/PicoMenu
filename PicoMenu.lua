@@ -1,5 +1,4 @@
 local BLOCKED_IN_COMBAT = "UI Action Blocked"
-local isMenuActive = false
 
 local menuList = {
     {
@@ -105,7 +104,7 @@ local menuList = {
         text = CHALLENGES,
         icon = "Interface\\BUTTONS\\UI-GroupLoot-DE-Up",
         func = function()
-            PVEFrame_ToggleFrame("ChallengesFrame",nil)
+            PVEFrame_ToggleFrame("ChallengesFrame", nil)
         end,
         notCheckable = true,
         fontObject = Game13Font,
@@ -127,12 +126,12 @@ local menuList = {
         end,
         notCheckable = true,
         fontObject = Game13Font,
-    },{
-        text = "                               ",
-        isTitle = true,
-        notCheckable = true,
-        fontObject = Game13Font,
-    },
+    }, {
+    text = "                               ",
+    isTitle = true,
+    notCheckable = true,
+    fontObject = Game13Font,
+},
     {
         text = HOUSING_DASHBOARD_FRAMETITLE,
         icon = "Interface\\MINIMAP\\TRACKING\\StableMaster",
@@ -258,15 +257,29 @@ local menuList = {
     },
 }
 
-local menuFrame = CreateFrame("Frame", "picomenuDropDownMenu", MainActionBar.EndCaps, "UIDropDownMenuTemplate")
+local menu = KROWI_LIBMAN:GetLibrary('Krowi_Menu_2')
 
-local function InitializeMenu(self, level)
-    for i, item in ipairs(menuList) do
-        UIDropDownMenu_AddButton(item, level)
+local function adjustItem(item)
+    local adjusted = {
+        Text = item.text,
+        Func = item.func,
+        IsTitle = item.isTitle,
+        NotCheckable = item.notCheckable,
+        Disabled = item.disabled,
+    }
+    if item.icon then
+        adjusted.Text = "|T" .. item.icon .. ":0|t " .. adjusted.Text
     end
+    return adjusted
 end
 
-UIDropDownMenu_Initialize(menuFrame, InitializeMenu, "MENU")
+for i, item in ipairs(menuList) do
+    if item.text == "                               " and item.isTitle then
+        menu:AddSeparator()
+    else
+        menu:AddFull(adjustItem(item))
+    end
+end
 
 -- Pico Menu Button
 local picoMenu = CreateFrame("Button", nil, MainActionBar)
@@ -289,16 +302,10 @@ picoMenu:GetHighlightTexture():SetAllPoints(picoMenu:GetNormalTexture())
 picoMenu:SetScript("OnMouseDown", function(self, button)
     self:GetNormalTexture():ClearAllPoints()
     self:GetNormalTexture():SetPoint("CENTER", 1, -1)
-    
+
     if button == "LeftButton" then
         if self:IsMouseOver() then
-            if isMenuActive == true then
-                CloseDropDownMenus()
-                isMenuActive = false
-            else
-                ToggleDropDownMenu(1, nil, menuFrame, self, 25, 275)
-                isMenuActive = true
-            end
+            menu:Toggle(self, 25, 275)
         end
     else
         if self:IsMouseOver() then
