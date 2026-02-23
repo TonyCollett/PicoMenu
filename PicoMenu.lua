@@ -235,7 +235,7 @@ local menuList = {
         text = BLIZZARD_STORE,
         icon = "Interface\\CHATFRAME\\UI-ChatIcon-Blizz",
         func = function()
-            ToggleStoreUI()
+            StoreMicroButton:Click()
         end,
         notCheckable = true,
         fontObject = Game13Font,

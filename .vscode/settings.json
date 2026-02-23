@@ -67,6 +67,7 @@
     "COOLDOWN_TYPE_NORMAL",
     "ATTACK_BUTTON_FLASH_TIME",
     "ZoneAbilityFrame",
-    "SpellFlyout"
+    "SpellFlyout",
+    "StoreMicroButton"
   ]
 }
