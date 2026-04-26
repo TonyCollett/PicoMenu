@@ -1,4 +1,5 @@
 local BLOCKED_IN_COMBAT = "UI Action Blocked"
+local UpdateMicroMenuVisibility
 
 local menuList = {
     {
@@ -255,16 +256,43 @@ local menuList = {
         notCheckable = true,
         fontObject = Game13Font,
     },
+    {
+        text = "Show MicroMenu",
+        checked = function()
+            return Config.showMicromenu
+        end,
+        func = function()
+            Config.showMicromenu = not Config.showMicromenu
+            UpdateMicroMenuVisibility()
+        end,
+        keepShownOnClick = true,
+        isNotRadio = true,
+        notCheckable = false,
+        fontObject = Game13Font,
+    },
 }
 
 local menu = KROWI_LIBMAN:GetLibrary('Krowi_Menu_2')
 
+UpdateMicroMenuVisibility = function()
+    if Config.showMicromenu then
+        MicroMenu:Show()
+        PetBattleFrame.BottomFrame.MicroButtonFrame:Show()
+    else
+        MicroMenu:Hide()
+        PetBattleFrame.BottomFrame.MicroButtonFrame:Hide()
+    end
+end
+
 local function adjustItem(item)
     local adjusted = {
         Text = item.text,
+        Checked = item.checked,
         Func = item.func,
         IsTitle = item.isTitle,
+        IsNotRadio = item.isNotRadio,
         NotCheckable = item.notCheckable,
+        KeepShownOnClick = item.keepShownOnClick,
         Disabled = item.disabled,
     }
     if item.icon then
@@ -330,13 +358,19 @@ picoMenu:SetScript("OnLeave", function()
 end)
 
 picoMenu:SetScript("OnEvent", function(self, event, ...)
-    if event == "PET_BATTLE_OPENING_START" then
+    if event == "ADDON_LOADED" then
+        local addonName = ...
+        if addonName == "PicoMenu" then
+            UpdateMicroMenuVisibility()
+        end
+    elseif event == "PET_BATTLE_OPENING_START" then
         picoMenu:SetParent(PetBattleFrame)
         picoMenu:SetSize(50, 50)
         picoMenu:SetPoint("CENTER", PetBattleFrame.BottomFrame.MicroButtonFrame, 0, 0)
         picoMenu:GetNormalTexture():SetSize(50, 50)
         picoMenu:SetFrameStrata("MEDIUM")
         picoMenu:SetFrameLevel(150)
+        UpdateMicroMenuVisibility()
     elseif event == "PET_BATTLE_CLOSE" then
         picoMenu:SetParent(MainActionBar)
         picoMenu:SetSize(40, 40)
@@ -344,6 +378,7 @@ picoMenu:SetScript("OnEvent", function(self, event, ...)
         picoMenu:GetNormalTexture():SetSize(40, 40)
         picoMenu:SetFrameStrata("MEDIUM")
         picoMenu:SetFrameLevel(150)
+        UpdateMicroMenuVisibility()
     end
 end)
 
@@ -354,5 +389,4 @@ HelpOpenWebTicketButton:SetScale(0.8)
 HelpOpenWebTicketButton:SetParent(picoMenu)
 
 -- Hide MicroButtonAndBagsBar
-MicroMenu:Hide()
-PetBattleFrame.BottomFrame.MicroButtonFrame:Hide()
+UpdateMicroMenuVisibility()
