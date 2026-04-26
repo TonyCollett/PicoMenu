@@ -250,14 +250,19 @@ local menuList = {
     {
         text = BATTLEFIELD_MINIMAP,
         -- colorCode = "|cff999999",
+        checked = function()
+            return BattlefieldMapFrame and BattlefieldMapFrame:IsShown()
+        end,
         func = function()
             ToggleBattlefieldMap()
         end,
-        notCheckable = true,
+        keepShownOnClick = true,
+        isNotRadio = true,
+        notCheckable = false,
         fontObject = Game13Font,
     },
     {
-        text = "Show MicroMenu",
+        text = "Show Main Menu",
         checked = function()
             return Config.showMicromenu
         end,
