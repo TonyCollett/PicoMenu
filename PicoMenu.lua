@@ -278,6 +278,8 @@ local menuList = {
 }
 
 local menu = KROWI_LIBMAN:GetLibrary('Krowi_Menu_2')
+local isPicoMenuOpen = false
+local lastPicoMenuHideTime = 0
 
 UpdateMicroMenuVisibility = function()
     if Config.showMicromenu then
@@ -286,6 +288,13 @@ UpdateMicroMenuVisibility = function()
     else
         MicroMenu:Hide()
         PetBattleFrame.BottomFrame.MicroButtonFrame:Hide()
+    end
+end
+
+local function UpdatePicoMenuState(isOpen)
+    isPicoMenuOpen = isOpen
+    if not isOpen then
+        lastPicoMenuHideTime = GetTime()
     end
 end
 
@@ -337,25 +346,38 @@ picoMenu:SetScript("OnMouseDown", function(self, button)
     self:GetNormalTexture():SetPoint("CENTER", 1, -1)
 
     if button == "LeftButton" then
-        if self:IsMouseOver() then
-            menu:Toggle(self, 25, 275)
-        end
-    else
-        if self:IsMouseOver() then
-            if not GameMenuFrame:IsVisible() then
-                ShowUIPanel(GameMenuFrame)
-            else
-                HideUIPanel(GameMenuFrame)
-            end
-        end
+        self.menuWasOpenOnMouseDown = isPicoMenuOpen
     end
 
     GameTooltip:Hide()
 end)
 
-picoMenu:SetScript("OnMouseUp", function(self)
+picoMenu:SetScript("OnMouseUp", function(self, button)
     self:GetNormalTexture():ClearAllPoints()
     self:GetNormalTexture():SetPoint("CENTER")
+
+    if not self:IsMouseOver() then
+        self.menuWasOpenOnMouseDown = false
+        return
+    end
+
+    if button == "LeftButton" then
+        local justClosed = (GetTime() - lastPicoMenuHideTime) < 0.1
+        if self.menuWasOpenOnMouseDown or justClosed then
+            menu:Close()
+            UpdatePicoMenuState(false)
+        else
+            menu:Open(self, 25, 275)
+        end
+    else
+        if not GameMenuFrame:IsVisible() then
+            ShowUIPanel(GameMenuFrame)
+        else
+            HideUIPanel(GameMenuFrame)
+        end
+    end
+
+    self.menuWasOpenOnMouseDown = false
 end)
 
 picoMenu:SetScript("OnLeave", function()
@@ -384,6 +406,16 @@ picoMenu:SetScript("OnEvent", function(self, event, ...)
         picoMenu:SetFrameStrata("MEDIUM")
         picoMenu:SetFrameLevel(150)
         UpdateMicroMenuVisibility()
+    end
+end)
+
+DropDownList1:HookScript("OnShow", function()
+    UpdatePicoMenuState(UIDROPDOWNMENU_OPEN_MENU == Krowi_Menu)
+end)
+
+DropDownList1:HookScript("OnHide", function()
+    if isPicoMenuOpen then
+        UpdatePicoMenuState(false)
     end
 end)
 
