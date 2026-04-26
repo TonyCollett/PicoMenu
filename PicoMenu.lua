@@ -135,7 +135,7 @@ local menuList = {
 },
     {
         text = HOUSING_DASHBOARD_FRAMETITLE,
-        icon = "Interface\\MINIMAP\\TRACKING\\StableMaster",
+        icon = "Interface\\GossipFrame\\BinderGossipIcon",
         func = function()
             if not (InCombatLockdown() or (UnitAffectingCombat("player") or UnitAffectingCombat("pet"))) then
                 HousingMicroButton:Click()
@@ -167,7 +167,7 @@ local menuList = {
     },
     {
         text = PETS,
-        icon = "Interface\\MINIMAP\\TRACKING\\StableMaster",
+        icon = "Interface\\ICONS\\Tracking_WildPet",
         func = function()
             if not (InCombatLockdown() or (UnitAffectingCombat("player") or UnitAffectingCombat("pet"))) then
                 ToggleCollectionsJournal(2)
@@ -206,7 +206,7 @@ local menuList = {
     },
     {
         text = WARDROBE,
-        icon = "Interface\\PaperDollInfoFrame\\UI-EquipmentManager-Toggle",
+        icon = "Interface\\Icons\\INV_Chest_Cloth_17",
         func = function()
             if not (InCombatLockdown() or (UnitAffectingCombat("player") or UnitAffectingCombat("pet"))) then
                 ToggleCollectionsJournal(5)
