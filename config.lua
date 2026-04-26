@@ -10,5 +10,3 @@ for key, value in pairs(defaults) do
         PicoMenuDB[key] = value
     end
 end
-
-Config = PicoMenuDB

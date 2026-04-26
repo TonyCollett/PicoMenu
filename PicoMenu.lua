@@ -264,10 +264,10 @@ local menuList = {
     {
         text = "Show Main Menu",
         checked = function()
-            return Config.showMicromenu
+            return PicoMenuDB.showMicromenu
         end,
         func = function()
-            Config.showMicromenu = not Config.showMicromenu
+            PicoMenuDB.showMicromenu = not PicoMenuDB.showMicromenu
             UpdateMicroMenuVisibility()
         end,
         keepShownOnClick = true,
@@ -282,7 +282,7 @@ local isPicoMenuOpen = false
 local lastPicoMenuHideTime = 0
 
 UpdateMicroMenuVisibility = function()
-    if Config.showMicromenu then
+    if PicoMenuDB.showMicromenu then
         MicroMenu:Show()
         PetBattleFrame.BottomFrame.MicroButtonFrame:Show()
     else
