@@ -1,10 +1,5 @@
 <Ui>
     <!--
-        Libraries
-    -->
-    <Include file="Libs\Krowi_Menu\Krowi_Menu.xml" />
-
-    <!--
         Config files.
     -->
     <Script file="config.lua" />

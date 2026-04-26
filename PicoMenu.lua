@@ -1,6 +1,14 @@
 local BLOCKED_IN_COMBAT = "UI Action Blocked"
 local UpdateMicroMenuVisibility
 
+local function IsBlockedInCombat()
+    return InCombatLockdown() or UnitAffectingCombat("player") or UnitAffectingCombat("pet")
+end
+
+local function ShowBlockedInCombatMessage()
+    UIErrorsFrame:AddMessage(BLOCKED_IN_COMBAT, 1, 0, 0)
+end
+
 local menuList = {
     {
         text = MAINMENU_BUTTON,
@@ -21,14 +29,14 @@ local menuList = {
         text = SPELLBOOK_ABILITIES_BUTTON,
         icon = "Interface\\MINIMAP\\TRACKING\\Class",
         func = function()
-            if not (InCombatLockdown() or (UnitAffectingCombat("player") or UnitAffectingCombat("pet"))) then
+            if not IsBlockedInCombat() then
                 ToggleSpellBook(BOOKTYPE_SPELL)
             else
-                UIErrorsFrame:AddMessage(BLOCKED_IN_COMBAT, 1, 0, 0)
+                ShowBlockedInCombatMessage()
             end
         end,
         notCheckable = true,
-        disabled = (InCombatLockdown() or (UnitAffectingCombat("player") or UnitAffectingCombat("pet"))),
+        disabled = IsBlockedInCombat,
         fontObject = Game13Font,
     },
     {
@@ -59,15 +67,11 @@ local menuList = {
         fontObject = Game13Font,
     },
     {
-        text = "                               ",
-        isTitle = true,
-        notCheckable = true,
-        fontObject = Game13Font,
+        isSeparator = true,
     },
     {
         text = COMMUNITIES_FRAME_TITLE,
         icon = "Interface\\GossipFrame\\TabardGossipIcon",
-        arg1 = IsInGuild("player"),
         func = function()
             ToggleGuildFrame()
         end,
@@ -128,38 +132,32 @@ local menuList = {
         notCheckable = true,
         fontObject = Game13Font,
     }, {
-    text = "                               ",
-    isTitle = true,
-    notCheckable = true,
-    fontObject = Game13Font,
+    isSeparator = true,
 },
     {
         text = HOUSING_DASHBOARD_FRAMETITLE,
         icon = "Interface\\GossipFrame\\BinderGossipIcon",
         func = function()
-            if not (InCombatLockdown() or (UnitAffectingCombat("player") or UnitAffectingCombat("pet"))) then
+            if not IsBlockedInCombat() then
                 HousingMicroButton:Click()
             else
-                UIErrorsFrame:AddMessage(BLOCKED_IN_COMBAT, 1, 0, 0)
+                ShowBlockedInCombatMessage()
             end
         end,
         notCheckable = true,
         fontObject = Game13Font,
     },
     {
-        text = "                               ",
-        isTitle = true,
-        notCheckable = true,
-        fontObject = Game13Font,
+        isSeparator = true,
     },
     {
         text = MOUNTS,
         icon = "Interface\\MINIMAP\\TRACKING\\StableMaster",
         func = function()
-            if not (InCombatLockdown() or (UnitAffectingCombat("player") or UnitAffectingCombat("pet"))) then
+            if not IsBlockedInCombat() then
                 ToggleCollectionsJournal(1)
             else
-                UIErrorsFrame:AddMessage(BLOCKED_IN_COMBAT, 1, 0, 0)
+                ShowBlockedInCombatMessage()
             end
         end,
         notCheckable = true,
@@ -169,10 +167,10 @@ local menuList = {
         text = PETS,
         icon = "Interface\\ICONS\\Tracking_WildPet",
         func = function()
-            if not (InCombatLockdown() or (UnitAffectingCombat("player") or UnitAffectingCombat("pet"))) then
+            if not IsBlockedInCombat() then
                 ToggleCollectionsJournal(2)
             else
-                UIErrorsFrame:AddMessage(BLOCKED_IN_COMBAT, 1, 0, 0)
+                ShowBlockedInCombatMessage()
             end
         end,
         notCheckable = true,
@@ -182,10 +180,10 @@ local menuList = {
         text = TOY_BOX,
         icon = "Interface\\MINIMAP\\TRACKING\\Reagents",
         func = function()
-            if not (InCombatLockdown() or (UnitAffectingCombat("player") or UnitAffectingCombat("pet"))) then
+            if not IsBlockedInCombat() then
                 ToggleCollectionsJournal(3)
             else
-                UIErrorsFrame:AddMessage(BLOCKED_IN_COMBAT, 1, 0, 0)
+                ShowBlockedInCombatMessage()
             end
         end,
         notCheckable = true,
@@ -195,10 +193,10 @@ local menuList = {
         text = HEIRLOOMS,
         icon = "Interface\\PaperDollInfoFrame\\UI-EquipmentManager-Toggle",
         func = function()
-            if not (InCombatLockdown() or (UnitAffectingCombat("player") or UnitAffectingCombat("pet"))) then
+            if not IsBlockedInCombat() then
                 ToggleCollectionsJournal(4)
             else
-                UIErrorsFrame:AddMessage(BLOCKED_IN_COMBAT, 1, 0, 0)
+                ShowBlockedInCombatMessage()
             end
         end,
         notCheckable = true,
@@ -208,20 +206,17 @@ local menuList = {
         text = WARDROBE,
         icon = "Interface\\Icons\\INV_Chest_Cloth_17",
         func = function()
-            if not (InCombatLockdown() or (UnitAffectingCombat("player") or UnitAffectingCombat("pet"))) then
+            if not IsBlockedInCombat() then
                 ToggleCollectionsJournal(5)
             else
-                UIErrorsFrame:AddMessage(BLOCKED_IN_COMBAT, 1, 0, 0)
+                ShowBlockedInCombatMessage()
             end
         end,
         notCheckable = true,
         fontObject = Game13Font,
     },
     {
-        text = "                               ",
-        isTitle = true,
-        notCheckable = true,
-        fontObject = Game13Font,
+        isSeparator = true,
     },
     {
         text = GM_EMAIL_NAME,
@@ -242,10 +237,7 @@ local menuList = {
         fontObject = Game13Font,
     },
     {
-        text = "                               ",
-        isTitle = true,
-        notCheckable = true,
-        fontObject = Game13Font,
+        isSeparator = true,
     },
     {
         text = BATTLEFIELD_MINIMAP,
@@ -277,8 +269,7 @@ local menuList = {
     },
 }
 
-local menu = KROWI_LIBMAN:GetLibrary('Krowi_Menu_2')
-local isPicoMenuOpen = false
+local picoMenuContextMenu
 local lastPicoMenuHideTime = 0
 
 UpdateMicroMenuVisibility = function()
@@ -291,36 +282,56 @@ UpdateMicroMenuVisibility = function()
     end
 end
 
-local function UpdatePicoMenuState(isOpen)
-    isPicoMenuOpen = isOpen
-    if not isOpen then
-        lastPicoMenuHideTime = GetTime()
-    end
-end
-
-local function adjustItem(item)
-    local adjusted = {
-        Text = item.text,
-        Checked = item.checked,
-        Func = item.func,
-        IsTitle = item.isTitle,
-        IsNotRadio = item.isNotRadio,
-        NotCheckable = item.notCheckable,
-        KeepShownOnClick = item.keepShownOnClick,
-        Disabled = item.disabled,
-    }
+local function GetMenuItemText(item)
     if item.icon then
-        adjusted.Text = "|T" .. item.icon .. ":0|t " .. adjusted.Text
+        return "|T" .. item.icon .. ":0|t " .. item.text
     end
-    return adjusted
+    return item.text
 end
 
-for i, item in ipairs(menuList) do
-    if item.text == "                               " and item.isTitle then
-        menu:AddSeparator()
-    else
-        menu:AddFull(adjustItem(item))
+local function IsItemDisabled(item)
+    if type(item.disabled) == "function" then
+        return item.disabled()
     end
+    return item.disabled == true
+end
+
+local function OpenPicoMenu(anchor)
+    if not MenuUtil or not MenuUtil.CreateContextMenu then
+        return nil
+    end
+
+    local menu
+    menu = MenuUtil.CreateContextMenu(anchor, function(_, rootDescription)
+        rootDescription:SetTag("PicoMenu")
+
+        for _, item in ipairs(menuList) do
+            if item.isSeparator then
+                rootDescription:CreateDivider()
+            elseif item.isTitle then
+                rootDescription:CreateTitle(GetMenuItemText(item))
+            elseif item.checked then
+                local checkbox = rootDescription:CreateCheckbox(GetMenuItemText(item), item.checked, item.func)
+                if item.keepShownOnClick and MenuResponse and MenuResponse.Refresh then
+                    checkbox:SetResponse(MenuResponse.Refresh)
+                end
+                if IsItemDisabled(item) then
+                    checkbox:SetEnabled(false)
+                end
+            else
+                local button = rootDescription:CreateButton(GetMenuItemText(item), item.func)
+                if IsItemDisabled(item) then
+                    button:SetEnabled(false)
+                end
+            end
+        end
+    end)
+
+    menu:SetPoint("BOTTOM", anchor, "TOP", 0, 8)
+    menu:HookScript("OnHide", function()
+        lastPicoMenuHideTime = GetTime()
+    end)
+    return menu
 end
 
 -- Pico Menu Button
@@ -346,7 +357,7 @@ picoMenu:SetScript("OnMouseDown", function(self, button)
     self:GetNormalTexture():SetPoint("CENTER", 1, -1)
 
     if button == "LeftButton" then
-        self.menuWasOpenOnMouseDown = isPicoMenuOpen
+        self.menuWasOpenOnMouseDown = picoMenuContextMenu and picoMenuContextMenu:IsShown()
     end
 
     GameTooltip:Hide()
@@ -364,10 +375,13 @@ picoMenu:SetScript("OnMouseUp", function(self, button)
     if button == "LeftButton" then
         local justClosed = (GetTime() - lastPicoMenuHideTime) < 0.1
         if self.menuWasOpenOnMouseDown or justClosed then
-            menu:Close()
-            UpdatePicoMenuState(false)
+            if picoMenuContextMenu and picoMenuContextMenu:IsShown() then
+                picoMenuContextMenu:Close()
+            end
+        elseif picoMenuContextMenu and picoMenuContextMenu:IsShown() then
+            picoMenuContextMenu:Close()
         else
-            menu:Open(self, 25, 275)
+            picoMenuContextMenu = OpenPicoMenu(self)
         end
     else
         if not GameMenuFrame:IsVisible() then
@@ -391,6 +405,9 @@ picoMenu:SetScript("OnEvent", function(self, event, ...)
             UpdateMicroMenuVisibility()
         end
     elseif event == "PET_BATTLE_OPENING_START" then
+        if picoMenuContextMenu and picoMenuContextMenu:IsShown() then
+            picoMenuContextMenu:Close()
+        end
         picoMenu:SetParent(PetBattleFrame)
         picoMenu:SetSize(50, 50)
         picoMenu:SetPoint("CENTER", PetBattleFrame.BottomFrame.MicroButtonFrame, 0, 0)
@@ -399,6 +416,9 @@ picoMenu:SetScript("OnEvent", function(self, event, ...)
         picoMenu:SetFrameLevel(150)
         UpdateMicroMenuVisibility()
     elseif event == "PET_BATTLE_CLOSE" then
+        if picoMenuContextMenu and picoMenuContextMenu:IsShown() then
+            picoMenuContextMenu:Close()
+        end
         picoMenu:SetParent(MainActionBar)
         picoMenu:SetSize(40, 40)
         picoMenu:SetPoint("CENTER", MainActionBar.EndCaps.RightEndCap, -15, 0)
@@ -406,16 +426,6 @@ picoMenu:SetScript("OnEvent", function(self, event, ...)
         picoMenu:SetFrameStrata("MEDIUM")
         picoMenu:SetFrameLevel(150)
         UpdateMicroMenuVisibility()
-    end
-end)
-
-DropDownList1:HookScript("OnShow", function()
-    UpdatePicoMenuState(UIDROPDOWNMENU_OPEN_MENU == Krowi_Menu)
-end)
-
-DropDownList1:HookScript("OnHide", function()
-    if isPicoMenuOpen then
-        UpdatePicoMenuState(false)
     end
 end)
 
