@@ -1,5 +1,6 @@
 local BLOCKED_IN_COMBAT = "UI Action Blocked"
 local UpdateMicroMenuVisibility
+local UpdateQueueEyePosition
 
 local function IsBlockedInCombat()
     return InCombatLockdown() or UnitAffectingCombat("player") or UnitAffectingCombat("pet")
@@ -280,6 +281,7 @@ UpdateMicroMenuVisibility = function()
         MicroMenu:Hide()
         PetBattleFrame.BottomFrame.MicroButtonFrame:Hide()
     end
+    UpdateQueueEyePosition()
 end
 
 local function GetMenuItemText(item)
@@ -351,6 +353,66 @@ picoMenu:GetNormalTexture():SetSize(40, 40)
 
 picoMenu:SetHighlightTexture("Interface\\AddOns\\PicoMenu\\Media\\picomenu\\picomenuHighlight")
 picoMenu:GetHighlightTexture():SetAllPoints(picoMenu:GetNormalTexture())
+
+-- Queue Status Button: reposition below PicoMenu when Main Menu is hidden
+local queueEyeHooked = false
+local queueEyeReanchoring = false
+local queueEyeOriginalParent = nil
+
+UpdateQueueEyePosition = function()
+    local btn = QueueStatusButton or QueueStatusMinimapButton
+    if not btn then return end
+    if btn:IsProtected() and InCombatLockdown() then return end
+
+    if not queueEyeOriginalParent then
+        queueEyeOriginalParent = btn:GetParent()
+    end
+
+    queueEyeReanchoring = true
+    if not PicoMenuDB.showMicromenu then
+        btn.ignoreFramePositionManager = true
+        if btn.SetIgnoreParentScale then btn:SetIgnoreParentScale(true) end
+        if btn.SetIgnoreParentAlpha then btn:SetIgnoreParentAlpha(true) end
+        btn:SetParent(picoMenu)
+        btn:ClearAllPoints()
+        btn:SetPoint("TOP", picoMenu, "BOTTOM", 0, 4)
+        btn:SetScale(0.5)
+        btn:SetFrameStrata(picoMenu:GetFrameStrata())
+        btn:SetFrameLevel(picoMenu:GetFrameLevel() + 1)
+    else
+        btn.ignoreFramePositionManager = nil
+        if btn.SetIgnoreParentScale then btn:SetIgnoreParentScale(false) end
+        if btn.SetIgnoreParentAlpha then btn:SetIgnoreParentAlpha(false) end
+        btn:SetScale(1)
+        if queueEyeOriginalParent then
+            btn:SetParent(queueEyeOriginalParent)
+        end
+    end
+    queueEyeReanchoring = false
+
+    if not queueEyeHooked then
+        queueEyeHooked = true
+        hooksecurefunc(btn, "SetPoint", function(self)
+            if queueEyeReanchoring then return end
+            if not PicoMenuDB.showMicromenu then
+                queueEyeReanchoring = true
+                self:ClearAllPoints()
+                self:SetPoint("TOP", picoMenu, "BOTTOM", 0, 4)
+                queueEyeReanchoring = false
+            end
+        end)
+        hooksecurefunc(btn, "SetParent", function(self)
+            if queueEyeReanchoring then return end
+            if not PicoMenuDB.showMicromenu then
+                queueEyeReanchoring = true
+                self:SetParent(picoMenu)
+                self:ClearAllPoints()
+                self:SetPoint("TOP", picoMenu, "BOTTOM", 0, 4)
+                queueEyeReanchoring = false
+            end
+        end)
+    end
+end
 
 picoMenu:SetScript("OnMouseDown", function(self, button)
     self:GetNormalTexture():ClearAllPoints()
