@@ -4,5 +4,6 @@
 ## Author: Zythyx0, nMainBar(Neal, ballagarba)
 ## Version: @project-version@
 ## SavedVariables: PicoMenuDB
+## X-Curse-Project-ID: 1711398
 
 PicoMenu.xml
