@@ -654,7 +654,10 @@ local function OpenPicoMenu(anchor)
         AddMenuItems(rootDescription, menuList)
     end)
 
-    menu:SetPoint("BOTTOM", anchor, "TOP", 0, 8)
+    -- CreateContextMenu pins the menu to the cursor in unscaled coordinates, which
+    -- drifts once the menu has its own scale; replace that anchor, don't add to it.
+    menu:ClearAllPoints()
+    menu:SetPoint("BOTTOMLEFT", anchor, "TOPRIGHT", 0, 0)
     menu:HookScript("OnHide", function()
         lastPicoMenuHideTime = GetTime()
     end)
