@@ -1,4 +1,4 @@
-## Interface: 120005
+## Interface: 120100
 ## Title: PicoMenu
 ## Notes: PicoMenu extracted from nMainBar
 ## Author: Zythyx0, nMainBar(Neal, ballagarba)
