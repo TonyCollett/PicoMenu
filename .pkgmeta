@@ -3,3 +3,4 @@ package-as: PicoMenu
 # Dotfiles (.github, .pkgmeta, .gitignore) are always left out of the zip.
 ignore:
   - README.md
+  - CLAUDE.md
