@@ -2,7 +2,7 @@
 ## Title: PicoMenu
 ## Notes: PicoMenu extracted from nMainBar
 ## Author: Zythyx0, nMainBar(Neal, ballagarba)
-## Version: 12.1
+## Version: @project-version@
 ## SavedVariables: PicoMenuDB
 
 PicoMenu.xml

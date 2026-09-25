@@ -1,0 +1,29 @@
+name: Package and release
+
+# Pushing a tag (e.g. 12.1.1) builds the addon zip, creates a GitHub release
+# and, once ## X-Curse-Project-ID is in the TOC, uploads it to CurseForge.
+on:
+  push:
+    tags:
+      - "**"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    env:
+      CF_API_KEY: ${{ secrets.CF_API_KEY }}
+      GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          # The packager walks back to the previous tag to build the changelog.
+          fetch-depth: 0
+
+      - name: Package and upload
+        uses: BigWigsMods/packager@v2
