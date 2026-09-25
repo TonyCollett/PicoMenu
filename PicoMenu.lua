@@ -11,6 +11,35 @@ local function ShowBlockedInCombatMessage()
     UIErrorsFrame:AddMessage(BLOCKED_IN_COMBAT, 1, 0, 0)
 end
 
+-- Menu size is applied as a scale on the whole menu rather than a font size: the
+-- Menu API sizes rows from Blizzard's own font, so a bigger font alone would overflow
+-- them, while a scale grows text, icons and padding together.
+local MIN_MENU_SCALE, MAX_MENU_SCALE = 0.5, 2
+local MENU_SCALE_PRESETS = { 0.8, 0.9, 1, 1.1, 1.25, 1.5 }
+
+local function GetMenuScale()
+    local scale = tonumber(PicoMenuDB.menuScale) or 1
+    return math.min(MAX_MENU_SCALE, math.max(MIN_MENU_SCALE, scale))
+end
+
+local function BuildMenuSizeItems()
+    local items = {}
+    for _, scale in ipairs(MENU_SCALE_PRESETS) do
+        table.insert(items, {
+            text = ("%d%%"):format(math.floor(scale * 100 + 0.5)),
+            isRadio = true,
+            value = scale,
+            checked = function(value)
+                return math.abs(GetMenuScale() - value) < 0.001
+            end,
+            func = function(value)
+                PicoMenuDB.menuScale = value
+            end,
+        })
+    end
+    return items
+end
+
 local function IsAddOnLoadedCompat(name)
     if C_AddOns and C_AddOns.IsAddOnLoaded then
         return C_AddOns.IsAddOnLoaded(name)
@@ -177,7 +206,6 @@ local menuList = {
         text = MAINMENU_BUTTON,
         isTitle = true,
         notCheckable = true,
-        fontObject = Game13Font,
     },
     {
         text = CHARACTER_BUTTON,
@@ -187,7 +215,6 @@ local menuList = {
             ToggleCharacter("PaperDollFrame")
         end,
         notCheckable = true,
-        fontObject = Game13Font,
     },
     {
         text = SPELLBOOK_ABILITIES_BUTTON,
@@ -202,7 +229,6 @@ local menuList = {
         end,
         notCheckable = true,
         disabled = IsBlockedInCombat,
-        fontObject = Game13Font,
     },
     {
         text = TALENTS,
@@ -217,7 +243,6 @@ local menuList = {
         end,
         notCheckable = true,
         disabled = IsBlockedInCombat,
-        fontObject = Game13Font,
     },
     {
         text = TRADE_SKILLS or "Professions",
@@ -232,7 +257,6 @@ local menuList = {
         end,
         notCheckable = true,
         disabled = IsBlockedInCombat,
-        fontObject = Game13Font,
     },
     {
         text = ACHIEVEMENT_BUTTON,
@@ -242,7 +266,6 @@ local menuList = {
             ToggleAchievementFrame()
         end,
         notCheckable = true,
-        fontObject = Game13Font,
     },
     {
         text = QUESTLOG_BUTTON,
@@ -252,7 +275,6 @@ local menuList = {
             ToggleQuestLog()
         end,
         notCheckable = true,
-        fontObject = Game13Font,
     },
     {
         text = CALENDAR or "Calendar",
@@ -261,7 +283,6 @@ local menuList = {
             OpenCalendar()
         end,
         notCheckable = true,
-        fontObject = Game13Font,
     },
     {
         isSeparator = true,
@@ -274,7 +295,6 @@ local menuList = {
             ToggleGuildFrame()
         end,
         notCheckable = true,
-        fontObject = Game13Font,
     },
     {
         text = SOCIAL_BUTTON,
@@ -284,7 +304,6 @@ local menuList = {
             ToggleFriendsFrame()
         end,
         notCheckable = true,
-        fontObject = Game13Font,
     },
     {
         text = PLAYER_V_PLAYER,
@@ -293,7 +312,6 @@ local menuList = {
             TogglePVPUI()
         end,
         notCheckable = true,
-        fontObject = Game13Font,
     },
     {
         text = DUNGEONS_BUTTON,
@@ -303,7 +321,6 @@ local menuList = {
             ToggleLFDParentFrame()
         end,
         notCheckable = true,
-        fontObject = Game13Font,
     },
     {
         text = CHALLENGES,
@@ -312,7 +329,6 @@ local menuList = {
             PVEFrame_ToggleFrame("ChallengesFrame", nil)
         end,
         notCheckable = true,
-        fontObject = Game13Font,
     },
     {
         text = GREAT_VAULT_REWARDS or WEEKLY_REWARDS or "Great Vault",
@@ -326,7 +342,6 @@ local menuList = {
         end,
         notCheckable = true,
         disabled = IsBlockedInCombat,
-        fontObject = Game13Font,
     },
     {
         text = RAID,
@@ -348,7 +363,6 @@ local menuList = {
         end,
         notCheckable = true,
         disabled = IsBlockedInCombat,
-        fontObject = Game13Font,
     },
     {
         text = ENCOUNTER_JOURNAL,
@@ -358,7 +372,6 @@ local menuList = {
             ToggleEncounterJournal(1)
         end,
         notCheckable = true,
-        fontObject = Game13Font,
     }, {
     isSeparator = true,
 },
@@ -373,7 +386,6 @@ local menuList = {
             end
         end,
         notCheckable = true,
-        fontObject = Game13Font,
     },
     {
         isSeparator = true,
@@ -390,7 +402,6 @@ local menuList = {
             end
         end,
         notCheckable = true,
-        fontObject = Game13Font,
     },
     {
         text = PETS,
@@ -403,7 +414,6 @@ local menuList = {
             end
         end,
         notCheckable = true,
-        fontObject = Game13Font,
     },
     {
         text = TOY_BOX,
@@ -416,7 +426,6 @@ local menuList = {
             end
         end,
         notCheckable = true,
-        fontObject = Game13Font,
     },
     {
         text = HEIRLOOMS,
@@ -429,7 +438,6 @@ local menuList = {
             end
         end,
         notCheckable = true,
-        fontObject = Game13Font,
     },
     {
         text = WARDROBE,
@@ -442,7 +450,6 @@ local menuList = {
             end
         end,
         notCheckable = true,
-        fontObject = Game13Font,
     },
     {
         isSeparator = true,
@@ -454,7 +461,6 @@ local menuList = {
             ToggleHelpFrame()
         end,
         notCheckable = true,
-        fontObject = Game13Font,
     },
     {
         text = BLIZZARD_STORE,
@@ -463,7 +469,6 @@ local menuList = {
             StoreMicroButton:Click()
         end,
         notCheckable = true,
-        fontObject = Game13Font,
     },
     {
         isSeparator = true,
@@ -472,7 +477,6 @@ local menuList = {
         text = SETTINGS,
         icon = "Interface\\Buttons\\UI-OptionsButton",
         notCheckable = true,
-        fontObject = Game13Font,
         submenu = {
             {
                 text = BATTLEFIELD_MINIMAP,
@@ -487,7 +491,6 @@ local menuList = {
                 keepShownOnClick = true,
                 isNotRadio = true,
                 notCheckable = false,
-                fontObject = Game13Font,
             },
             {
                 text = "Show Main Menu",
@@ -501,7 +504,6 @@ local menuList = {
                 keepShownOnClick = true,
                 isNotRadio = true,
                 notCheckable = false,
-                fontObject = Game13Font,
             },
             {
                 text = "Show Pico Menu Button",
@@ -519,7 +521,11 @@ local menuList = {
                 keepShownOnClick = true,
                 isNotRadio = true,
                 notCheckable = false,
-                fontObject = Game13Font,
+            },
+            {
+                text = "Menu Size",
+                notCheckable = true,
+                submenu = BuildMenuSizeItems(),
             },
             {
                 isSeparator = true,
@@ -536,7 +542,6 @@ local menuList = {
                 end,
                 notCheckable = true,
                 disabled = IsBlockedInCombat,
-                fontObject = Game13Font,
             },
         },
     },
@@ -586,19 +591,36 @@ end
 
 local AddMenuItems
 
+-- Submenus are separate frames, so scale whichever menu each element lands in
+-- instead of only the root menu we get back from CreateContextMenu.
+local function ApplyMenuScale(_, _, menu)
+    if menu then
+        menu:SetScale(GetMenuScale())
+    end
+end
+
 local function AddMenuItem(description, item)
     if item.isSeparator then
         description:CreateDivider()
     elseif item.isTitle then
-        description:CreateTitle(GetMenuItemText(item))
+        description:CreateTitle(GetMenuItemText(item)):AddInitializer(ApplyMenuScale)
     elseif item.submenu then
         local submenu = description:CreateButton(GetMenuItemText(item))
+        submenu:AddInitializer(ApplyMenuScale)
         AddMenuItems(submenu, item.submenu)
         if IsItemDisabled(item) then
             submenu:SetEnabled(false)
         end
+    elseif item.isRadio then
+        -- Close on pick: the new size takes effect the next time the menu opens.
+        local radio = description:CreateRadio(GetMenuItemText(item), item.checked, item.func, item.value)
+        radio:AddInitializer(ApplyMenuScale)
+        if MenuResponse and MenuResponse.Close then
+            radio:SetResponse(MenuResponse.Close)
+        end
     elseif item.checked then
         local checkbox = description:CreateCheckbox(GetMenuItemText(item), item.checked, item.func)
+        checkbox:AddInitializer(ApplyMenuScale)
         if item.keepShownOnClick and MenuResponse and MenuResponse.Refresh then
             checkbox:SetResponse(MenuResponse.Refresh)
         end
@@ -607,6 +629,7 @@ local function AddMenuItem(description, item)
         end
     else
         local button = description:CreateButton(GetMenuItemText(item), item.func)
+        button:AddInitializer(ApplyMenuScale)
         if IsItemDisabled(item) then
             button:SetEnabled(false)
         end
@@ -921,6 +944,19 @@ SlashCmdList["PICOMENU"] = function(msg)
             end
             print(("  %s: %s"):format(source.label, state))
         end
+        return
+    end
+
+    local scaleArg = command:match("^scale%s*(.*)$")
+    if scaleArg then
+        local percent = tonumber((scaleArg:gsub("%%", "")))
+        if percent then
+            -- Accept both "120" and "1.2".
+            local scale = percent > MAX_MENU_SCALE and percent / 100 or percent
+            PicoMenuDB.menuScale = math.min(MAX_MENU_SCALE, math.max(MIN_MENU_SCALE, scale))
+        end
+        print(("|cff00ff00PicoMenu|r: menu size %d%%. Use |cffffff00/pico scale 50-200|r to change it."):format(
+            math.floor(GetMenuScale() * 100 + 0.5)))
         return
     end
 
