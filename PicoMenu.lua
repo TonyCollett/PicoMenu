@@ -2,6 +2,7 @@ local BLOCKED_IN_COMBAT = "UI Action Blocked"
 local UpdateMicroMenuVisibility
 local UpdateQueueEyePosition
 local UpdatePicoMenuVisibility
+local ApplyButtonSide
 
 local function IsBlockedInCombat()
     return InCombatLockdown() or UnitAffectingCombat("player") or UnitAffectingCombat("pet")
@@ -34,6 +35,37 @@ local function BuildMenuSizeItems()
             end,
             func = function(value)
                 PicoMenuDB.menuScale = value
+            end,
+        })
+    end
+    return items
+end
+
+local function IsButtonOnLeft()
+    return PicoMenuDB.buttonSide == "LEFT"
+end
+
+-- The action bar's end caps are gryphons for Alliance and wyverns for Horde.
+local function GetEndCapName()
+    return UnitFactionGroup("player") == "Horde" and "Wyvern" or "Gryphon"
+end
+
+local function BuildButtonSideItems()
+    local items = {}
+    for _, side in ipairs({ "LEFT", "RIGHT" }) do
+        table.insert(items, {
+            -- Resolved when the menu opens, since the faction isn't known at load time.
+            text = function()
+                return (side == "LEFT" and "Left " or "Right ") .. GetEndCapName()
+            end,
+            isRadio = true,
+            value = side,
+            checked = function(value)
+                return PicoMenuDB.buttonSide == value
+            end,
+            func = function(value)
+                PicoMenuDB.buttonSide = value
+                ApplyButtonSide()
             end,
         })
     end
@@ -523,6 +555,11 @@ local menuList = {
                 notCheckable = false,
             },
             {
+                text = "Button Position",
+                notCheckable = true,
+                submenu = BuildButtonSideItems(),
+            },
+            {
                 text = "Menu Size",
                 notCheckable = true,
                 submenu = BuildMenuSizeItems(),
@@ -569,6 +606,9 @@ end
 
 local function GetMenuItemText(item)
     local text = item.text
+    if type(text) == "function" then
+        text = text()
+    end
     if item.icon then
         text = "|T" .. item.icon .. ":0|t " .. text
     end
@@ -657,7 +697,12 @@ local function OpenPicoMenu(anchor)
     -- CreateContextMenu pins the menu to the cursor in unscaled coordinates, which
     -- drifts once the menu has its own scale; replace that anchor, don't add to it.
     menu:ClearAllPoints()
-    menu:SetPoint("BOTTOMLEFT", anchor, "TOPRIGHT", 0, 0)
+    -- Open away from the bar: up and outwards from whichever end cap the button is on.
+    if IsButtonOnLeft() then
+        menu:SetPoint("BOTTOMRIGHT", anchor, "TOPLEFT", 0, 0)
+    else
+        menu:SetPoint("BOTTOMLEFT", anchor, "TOPRIGHT", 0, 0)
+    end
     menu:HookScript("OnHide", function()
         lastPicoMenuHideTime = GetTime()
     end)
@@ -690,7 +735,6 @@ picoMenu:GetHighlightTexture():SetAllPoints(picoMenu:GetNormalTexture())
 local alertIndicator = picoMenu:CreateTexture(nil, "OVERLAY")
 alertIndicator:SetTexture("Interface\\COMMON\\Indicator-Yellow")
 alertIndicator:SetSize(14, 14)
-alertIndicator:SetPoint("TOPRIGHT", picoMenu, "TOPRIGHT", 1, 1)
 alertIndicator:Hide()
 
 local alertPulse = alertIndicator.CreateAnimationGroup and alertIndicator:CreateAnimationGroup()
@@ -727,11 +771,16 @@ local function AnchorToMainBar()
     picoMenu:SetParent(MainActionBar)
     picoMenu:SetSize(40, 40)
     picoMenu:ClearAllPoints()
-    local endCap = MainActionBar.EndCaps and MainActionBar.EndCaps.RightEndCap
+    local onLeft = IsButtonOnLeft()
+    local endCaps = MainActionBar.EndCaps
+    local endCap = endCaps and (onLeft and endCaps.LeftEndCap or endCaps.RightEndCap)
     if endCap then
-        picoMenu:SetPoint("CENTER", endCap, -15, 0)
-    else
+        -- Nudge inwards, towards the bar, onto the body of the end cap art.
+        picoMenu:SetPoint("CENTER", endCap, onLeft and 15 or -15, 0)
+    elseif onLeft then
         -- Bar art can be disabled, which removes the end caps entirely.
+        picoMenu:SetPoint("RIGHT", MainActionBar, "LEFT", -4, 0)
+    else
         picoMenu:SetPoint("LEFT", MainActionBar, "RIGHT", 4, 0)
     end
     picoMenu:GetNormalTexture():SetSize(40, 40)
@@ -890,16 +939,44 @@ picoMenu:SetScript("OnLeave", function()
     GameTooltip:Hide()
 end)
 
-local function Initialize()
-    AnchorToMainBar()
+-- Keep the alert dot and ticket icon on the button's outer side, away from the bar.
+local function AnchorSideDetails()
+    local onLeft = IsButtonOnLeft()
 
-    -- Move Ticket Icon
+    alertIndicator:ClearAllPoints()
+    if onLeft then
+        alertIndicator:SetPoint("TOPLEFT", picoMenu, "TOPLEFT", -1, 1)
+    else
+        alertIndicator:SetPoint("TOPRIGHT", picoMenu, "TOPRIGHT", 1, 1)
+    end
+
     if HelpOpenWebTicketButton then
         HelpOpenWebTicketButton:ClearAllPoints()
-        HelpOpenWebTicketButton:SetPoint("LEFT", picoMenu, "RIGHT", 0, 0)
+        if onLeft then
+            HelpOpenWebTicketButton:SetPoint("RIGHT", picoMenu, "LEFT", 0, 0)
+        else
+            HelpOpenWebTicketButton:SetPoint("LEFT", picoMenu, "RIGHT", 0, 0)
+        end
+    end
+end
+
+ApplyButtonSide = function()
+    -- During a pet battle the button lives on the pet battle bar; PET_BATTLE_CLOSE
+    -- re-anchors it to the chosen side afterwards.
+    if not (C_PetBattles and C_PetBattles.IsInBattle and C_PetBattles.IsInBattle()) then
+        AnchorToMainBar()
+    end
+    AnchorSideDetails()
+end
+
+local function Initialize()
+    -- Move Ticket Icon
+    if HelpOpenWebTicketButton then
         HelpOpenWebTicketButton:SetScale(0.8)
         HelpOpenWebTicketButton:SetParent(picoMenu)
     end
+
+    ApplyButtonSide()
 
     -- Hide MicroButtonAndBagsBar
     UpdateMicroMenuVisibility()

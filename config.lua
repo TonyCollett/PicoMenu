@@ -2,6 +2,7 @@ local defaults = {
     showPicomenu = true,
     showMicromenu = false,
     menuScale = 1,
+    buttonSide = "RIGHT", -- which action bar end cap the button sits on
 }
 
 local function ApplyDefaults()

@@ -16,7 +16,8 @@ extracted from nMainBar (Neal, ballagarba).
   `.build.info` in the WoW root for the installed version). `## Version` stays
   `@project-version@`; the packager fills it in from the git tag.
 - `PicoMenu.xml`: load order, `config.lua` then `PicoMenu.lua`.
-- `config.lua`: `PicoMenuDB` defaults (`showPicomenu`, `showMicromenu`, `menuScale`).
+- `config.lua`: `PicoMenuDB` defaults (`showPicomenu`, `showMicromenu`, `menuScale`,
+  `buttonSide`).
 - `PicoMenu.lua`: menu definition (`menuList`), menu building, button, alerts, `/pico`.
 - `Media/picomenu/`: the button textures. Everything else in `Media/` was removed as unused.
 
@@ -36,7 +37,12 @@ extracted from nMainBar (Neal, ballagarba).
   - Menu size is a scale applied per menu frame through `AddInitializer(ApplyMenuScale)`,
     so submenus scale too. Every new element type must get that initializer.
   - `CreateContextMenu` pins the menu to the cursor; `OpenPicoMenu` calls
-    `ClearAllPoints()` before anchoring the menu's BOTTOMLEFT to the button's TOPRIGHT.
+    `ClearAllPoints()` before anchoring the menu.
+- **Button side** (`buttonSide`, Settings > Button Position): the button sits on the
+  left or right action bar end cap (gryphon for Alliance, wyvern for Horde). Everything
+  mirrors: the menu opens up and outwards (BOTTOMLEFT to the button's TOPRIGHT on the
+  right, BOTTOMRIGHT to TOPLEFT on the left), and `AnchorSideDetails` puts the alert dot
+  and ticket icon on the outer side. New side-dependent anchors belong there.
 - The queue eye (`QueueStatusButton`) is reparented under the button when the micro menu
   is hidden; see `UpdateQueueEyePosition`.
 
